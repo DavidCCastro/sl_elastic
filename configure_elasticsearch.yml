@@ -1,0 +1,85 @@
+- hosts: slelasticbase
+  user: smartlis
+  become: yes
+  become_method: sudo
+  tasks:
+  
+    - name: install openjdk-8-jre-headless
+      apt:
+        name: openjdk-8-jre-headless
+        state: present
+  
+    - name: Create /mnt/data/elasticsearch folder
+      file:
+        path: /mnt/data/elasticsearch
+        state: directory
+        owner: elasticsearch
+        
+    - name: Configure OS virtual memory
+      sysctl:
+        name: vm.max_map_count
+        value: 262144
+        state: present
+        
+    - name: Enable LimitMEMLOCK=infinity parameter
+      lineinfile:
+        path: /usr/lib/systemd/system/elasticsearch.service
+        regexp: '^#LimitMEMLOCK=infinity'
+        line: 'LimitMEMLOCK=infinity'
+     
+    - name: Enable MAX_LOCKED_MEMORY=unlimited parameter
+      lineinfile:
+        path: /etc/default/elasticsearch
+        regexp: '^#MAX_LOCKED_MEMORY=unlimited'
+        line: 'MAX_LOCKED_MEMORY=unlimited'
+        
+    - name: Configure heap memory
+      lineinfile:
+        path: /etc/default/elasticsearch
+        regexp: '^#ES_HEAP_SIZE='
+        line: 'ES_HEAP_SIZE=4g'
+        
+    - name: Lock memory size to avoid swapping
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#bootstrap.mlockall: true'
+        line: 'bootstrap.mlockall: true'
+        
+    - name: Change data directory
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#path.data'
+        line: 'path.data: /mnt/data/elasticsearch'
+        
+    - name: Unpack Elasticsearch plugin
+      unarchive:
+        src: ftp://192.1.1.181//elastic1.7/elasticsearch/plugins/master.zip
+        dest: /home/smartlis
+        remote_src: yes
+        
+    - name: Move extracted folder to elasticsearch plugin folder
+      become: yes
+      shell: mv /home/smartlis/elasticsearch-head-master /usr/share/elasticsearch/plugins/head
+    
+    - name: modify cluster.name to "smartlis" in /etc/elasticsearch/elasticsearch.yml
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#cluster.name: elasticsearch'
+        line: 'cluster.name: smartlis'
+
+    - name: modify node.name in /etc/elasticsearch/elasticsearch.yml
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#node.name:'
+        line: 'node.name: ${HOSTNAME}'
+
+    - name: modify node.master to "true" /etc/elasticsearch/elasticsearch.yml
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#node.master: true'
+        line: 'node.master: true'
+
+    - name: Start elasticsearch service
+      service:
+        name: elasticsearch
+        state: started

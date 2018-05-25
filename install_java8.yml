@@ -1,0 +1,10 @@
+- hosts: slelasticbase
+  user: smartlis
+  become: yes
+  become_method: sudo
+  tasks:
+
+    - name: install java8
+      apt:
+        name: openjdk-8-jre-headless
+        state: present

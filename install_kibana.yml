@@ -1,0 +1,35 @@
+- hosts: slelasticbase
+  become: yes
+  become_method: sudo
+  tasks:
+    
+    - name: Unpack kibana 4.1.11
+      unarchive:
+        src: ftp://192.1.1.181/elastic1.7/kibana/kibana-4.1.11-linux-x64.tar.gz
+        dest: /home/temp
+        remote_src: yes
+    
+    - name: Move extracted content to /opt/kibana/4.1.11
+      become: yes
+      shell: mv /home/temp/kibana-4.1.11-linux-x64 /opt/kibana/4.1.11
+      
+    - name: Replace Kibana file
+      get_url:
+        url: ftp://192.1.1.181/elastic1.7/kibana/kibana4_init
+        dest: /etc/init.d/kibana
+      
+    - name: Edit Kibana file
+      become: yes
+      shell: sed -i -e 's/kibana4_init/kibana/' -e 's/\(kibana\)4/\1/I' -e 's|KIBANA_BIN=/opt/kibana/bin|KIBANA_BIN=/opt/kibana/4.1.11/bin|' /etc/init.d/kibana
+      
+    - name: Edit kibana file permissions
+      file:
+        path: /etc/init.d/kibana
+        state: file
+        mode: "ugo+x"
+        
+    - name: Enable Kibana service
+      systemd:
+        name: kibana
+        state: restarted
+        daemon_reload: yes

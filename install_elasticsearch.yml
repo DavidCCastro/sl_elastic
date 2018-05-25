@@ -1,0 +1,15 @@
+- hosts: slelasticbase
+  user: smartlis
+  become: yes
+  become_method: sudo
+  tasks:
+
+    - name: Install elasticsearch
+      apt: 
+        name: elasticsearch
+        state: present
+
+    - name: check elasticsearch is started
+      service:
+        name: elasticsearch
+        state: started

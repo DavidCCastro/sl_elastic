@@ -1,0 +1,27 @@
+- hosts: slelasticbase
+  become: yes
+  become_method: sudo
+  tasks:
+    
+    - name: Create /var/log/kibana folder
+      file:
+        path: /var/log/kibana
+        state: directory
+        owner: nobody
+    
+    - name: Edit kibana.yml to define log folder
+      lineinfile:
+        path: /opt/kibana/4.1.11/config/kibana.yml
+        regexp: '^# log_file: ./kibana.log'
+        line: 'log_file: /var/log/kibana/kibana.log'
+     
+    - name: Create index for kibana in Elasticsearch
+      become: yes
+      command: curl -XPUT localhost:9200/.kibana/ -d {{ "item" }}
+      with_items:
+        - index.mapper.dynamic: true
+        
+    - name: Restart kibana service
+      service:
+        name: kibana
+        state: restarted
