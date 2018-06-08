@@ -53,7 +53,7 @@
         
     - name: Unpack Elasticsearch plugin
       unarchive:
-        src: ftp://192.1.1.181//elastic1.7/elasticsearch/plugins/master.zip
+        src: ftp://192.1.1.181/elastic1.7/elasticsearch/plugins/master.zip
         dest: /home/smartlis
         remote_src: yes
         
