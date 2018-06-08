@@ -1,4 +1,5 @@
 - hosts: slelasticbase
+  user: smartlis
   become: yes
   become_method: sudo
   tasks:
@@ -9,9 +10,9 @@
         dest: /home/temp
         remote_src: yes
         
-    - name: Create /opt/kibana/4.1.11 directory
+    - name: Create /opt/kibana directory
       file:
-        path: /opt/kibana/4.1.11
+        path: /opt/kibana/
         state: directory
     
     - name: Move extracted content to /opt/kibana/4.1.11
