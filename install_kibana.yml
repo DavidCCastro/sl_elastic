@@ -8,6 +8,11 @@
         src: ftp://192.1.1.181/elastic1.7/kibana/kibana-4.1.11-linux-x64.tar.gz
         dest: /home/temp
         remote_src: yes
+        
+    - name: Create /opt/kibana/4.1.11 directory
+      file:
+        path: /opt/kibana/4.1.11
+        state: directory
     
     - name: Move extracted content to /opt/kibana/4.1.11
       become: yes
