@@ -80,6 +80,8 @@
         line: 'node.master: true'
 
     - name: Start elasticsearch service
-      service:
+      systemd:
         name: elasticsearch
         state: started
+        enabled: yes
+        masked: no
