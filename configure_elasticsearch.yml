@@ -85,3 +85,8 @@
         state: started
         enabled: yes
         masked: no
+        
+    - name: Restart elasticsearch service
+      service:
+        name: elasticsearch
+        state: restarted
